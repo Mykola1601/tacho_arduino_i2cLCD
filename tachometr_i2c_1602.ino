@@ -15,17 +15,23 @@ float R2 = 10000.0;
 float k = R2/(R1+R2);
 
 
-unsigned long lastflash;
-int RPM = 0;        // value read from the pot
-int divider = 130;
-
+unsigned long lastflash = 0; // Час останнього обрахунку
+unsigned long currentTime = 0; // Поточний час
+int RPM = 0;                  // Обчислені оберти
+int divider = 130;            //130 Кількість зубів для обчислення
+int toothCounter = 0;         // Лічильник зубів
 
 
 void sens() {
-  RPM=60/((float)(micros()-lastflash)/1000000)/divider;  //расчет
-  lastflash=micros();  //запомнить время последнего оборота
+  toothCounter++; // Збільшити лічильник зубів
+  if (toothCounter >= divider) { // Якщо досягнуто потрібної кількості зубів
+    currentTime = micros(); // Зчитати поточний час
+    // Обчислення RPM
+    RPM = 60 / ((float)(currentTime - lastflash) / 1000000) ;
+    lastflash = currentTime; // Оновити час останнього обрахунку
+    toothCounter = 0;        // Скинути лічильник зубів
+  }
 }
-
 
 void setup() {
   Serial.begin(9600);
